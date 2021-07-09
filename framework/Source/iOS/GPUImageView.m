@@ -232,15 +232,20 @@
 
 - (void)recalculateViewGeometry;
 {
+    
+    __block CGRect currentBounds;
+    
+    runOnMainQueueWithoutDeadlocking(^{
+        currentBounds = self.bounds;
+    });
+    
     runSynchronouslyOnVideoProcessingQueue(^{
         CGFloat heightScaling, widthScaling;
-        
-        CGSize currentViewSize = self.bounds.size;
         
         //    CGFloat imageAspectRatio = inputImageSize.width / inputImageSize.height;
         //    CGFloat viewAspectRatio = currentViewSize.width / currentViewSize.height;
         
-        CGRect insetRect = AVMakeRectWithAspectRatioInsideRect(inputImageSize, self.bounds);
+        CGRect insetRect = AVMakeRectWithAspectRatioInsideRect(inputImageSize, currentBounds);
         
         switch(_fillMode)
         {
@@ -251,14 +256,14 @@
             }; break;
             case kGPUImageFillModePreserveAspectRatio:
             {
-                widthScaling = insetRect.size.width / currentViewSize.width;
-                heightScaling = insetRect.size.height / currentViewSize.height;
+                widthScaling = insetRect.size.width / currentBounds.size.width;
+                heightScaling = insetRect.size.height / currentBounds.size.height;
             }; break;
             case kGPUImageFillModePreserveAspectRatioAndFill:
             {
                 //            CGFloat widthHolder = insetRect.size.width / currentViewSize.width;
-                widthScaling = currentViewSize.height / insetRect.size.height;
-                heightScaling = currentViewSize.width / insetRect.size.width;
+                widthScaling = currentBounds.size.height / insetRect.size.height;
+                heightScaling = currentBounds.size.width / insetRect.size.width;
             }; break;
         }
         
@@ -279,6 +284,7 @@
 //        1.0f,  1.0f,
 //    };
 }
+
 
 - (void)setBackgroundColorRed:(GLfloat)redComponent green:(GLfloat)greenComponent blue:(GLfloat)blueComponent alpha:(GLfloat)alphaComponent;
 {
